@@ -72,7 +72,10 @@ def _write_env(project_dir, env_vars):
 
 def _prompt(label, secret=False, default=""):
     """Prompts the user for a value, masking input if secret=True."""
-    hint = f" [{default}]" if default else ""
+    if default:
+        hint = " [********]" if secret else f" [{default}]"
+    else:
+        hint = ""
     full_label = f"  {label}{hint}: "
     try:
         if secret:
@@ -118,11 +121,15 @@ def cmd_setup(args):
       - Database Configuration (SQLite default vs Supabase/Postgres)
     """
     project_dir = _find_project_dir()
+    is_guide = getattr(args, "guide", False)
+
+    from ain_state_compiler.sync import _load_env_file
+    _load_env_file(project_dir)
 
     _print("\n======================================================")
     _print("  AIN State Compiler -- Setup Wizard")
     _print("======================================================")
-    _print("  Press Enter to skip any field and set it later.")
+    _print("  Press Enter to skip any field and keep the default.")
     _print("  PowerShell Hint: You can also configure variables directly using:")
     _print("  $env:SLACK_BOT_TOKEN=\"your-token\"")
     _print("  $env:JIRA_URL=\"https://yourorg.atlassian.net\"")
@@ -134,29 +141,61 @@ def cmd_setup(args):
     _print("  $env:SUPABASE_URL=\"https://xxx.supabase.co\"")
     _print("  $env:SUPABASE_SERVICE_ROLE_KEY=\"service-role-key\"\n")
 
+    if is_guide:
+        _print("--- GUIDE MODE ACTIVE ---")
+
     # ---- Slack ----
-    _print("[1/5] Slack Integration")
-    slack_token = _prompt("Slack Bot Token (xoxb-...)", secret=True)
+    _print("\n[1/5] Slack Integration")
+    if is_guide:
+        _print("  Slack Setup Guide:")
+        _print("  1. Go to: https://api.slack.com/apps")
+        _print("  2. Click 'Create New App' -> 'From scratch'.")
+        _print("  3. Under 'OAuth & Permissions' -> 'Scopes' -> 'Bot Token Scopes', add:")
+        _print("     - channels:history")
+        _print("     - groups:history")
+        _print("     - im:history")
+        _print("  4. Scroll up and click 'Install to Workspace' -> click Allow.")
+        _print("  5. Copy the 'Bot User OAuth Token' (starts with xoxb-).\n")
+    slack_token = _prompt("Slack Bot Token (xoxb-...)", secret=True, default=os.environ.get("SLACK_BOT_TOKEN", ""))
 
     # ---- Jira ----
     _print("\n[2/5] Jira Integration")
-    jira_url = _prompt("Jira Base URL (e.g. https://yourorg.atlassian.net)")
-    jira_email = _prompt("Jira Account Email")
-    jira_token = _prompt("Jira API Token", secret=True)
+    if is_guide:
+        _print("  Jira Setup Guide:")
+        _print("  1. Go to: https://id.atlassian.com/manage-profile/security/api-tokens")
+        _print("  2. Click 'Create API token'.")
+        _print("  3. Label it 'AIN State Compiler' and click 'Create'.")
+        _print("  4. Copy the generated token.")
+        _print("  5. Note down your Jira Base URL (e.g. https://yourorg.atlassian.net) and email.\n")
+    jira_url = _prompt("Jira Base URL (e.g. https://yourorg.atlassian.net)", default=os.environ.get("JIRA_URL", ""))
+    jira_email = _prompt("Jira Account Email", default=os.environ.get("JIRA_EMAIL", ""))
+    jira_token = _prompt("Jira API Token", secret=True, default=os.environ.get("JIRA_API_TOKEN", ""))
 
     # ---- Gmail ----
     _print("\n[3/5] Gmail Integration")
-    gmail_address = _prompt("Gmail Address")
-    gmail_app_password = _prompt("Gmail App Password (not your login password)", secret=True)
+    if is_guide:
+        _print("  Gmail Setup Guide:")
+        _print("  1. Go to: https://myaccount.google.com/apppasswords")
+        _print("  2. (Make sure 2-Step Verification is enabled on your Google Account).")
+        _print("  3. Enter an App name: 'AIN State Compiler' and click 'Create'.")
+        _print("  4. Copy the 16-character generated password (exclude spaces).\n")
+    gmail_address = _prompt("Gmail Address", default=os.environ.get("GMAIL_ADDRESS", ""))
+    gmail_app_password = _prompt("Gmail App Password (not your login password)", secret=True, default=os.environ.get("GMAIL_APP_PASSWORD", ""))
 
     # ---- Database Configuration ----
     _print("\n[4/5] Database Backend Configuration")
     _print("  Local SQLite is the default backend. It is 100% offline, requires no cloud accounts, and bypasses InfoSec reviews.")
-    db_choice = _prompt("Choose backend: (1) Local SQLite [Default], (2) Supabase Cloud, (3) Custom PostgreSQL", default="1")
+    db_default = "1"
+    if os.environ.get("USE_SUPABASE", "").strip().lower() in ("true", "1", "yes"):
+        db_default = "2"
+    elif os.environ.get("DB_HOST", ""):
+        db_default = "3"
+    db_choice = _prompt("Choose backend: (1) Local SQLite [Default], (2) Supabase Cloud, (3) Custom PostgreSQL", default=db_default)
 
     supabase_url = ""
     supabase_anon_key = ""
     supabase_service_key = ""
+    use_supabase = ""
     db_host = ""
     db_port = ""
     db_name = ""
@@ -164,18 +203,27 @@ def cmd_setup(args):
     db_password = ""
 
     if db_choice == "2":
+        use_supabase = "true"
         _print("\n[5/5] Supabase Configuration (Central Cloud Database)")
-        _print("  Create a project at https://supabase.com, then paste credentials here.")
-        supabase_url = _prompt("Supabase Project URL (e.g. https://xxxxx.supabase.co)")
-        supabase_anon_key = _prompt("Supabase Anon (Public) Key", secret=True)
-        supabase_service_key = _prompt("Supabase Service Role Key (admin access)", secret=True)
+        if is_guide:
+            _print("  Supabase Setup Guide:")
+            _print("  1. Go to: https://supabase.com/dashboard/projects")
+            _print("  2. Create a new project or select an existing one.")
+            _print("  3. Go to 'Project Settings' (gear icon) -> 'API'.")
+            _print("  4. Under 'Project API keys', copy the 'service_role' key (Required for admin sync).")
+            _print("  5. Under 'Project URL', copy the URL (starts with https://).\n")
+        else:
+            _print("  Create a project at https://supabase.com, then paste credentials here.")
+        supabase_url = _prompt("Supabase Project URL (e.g. https://xxxxx.supabase.co)", default=os.environ.get("SUPABASE_URL", ""))
+        supabase_anon_key = _prompt("Supabase Anon (Public) Key", secret=True, default=os.environ.get("SUPABASE_ANON_KEY", ""))
+        supabase_service_key = _prompt("Supabase Service Role Key (admin access)", secret=True, default=os.environ.get("SUPABASE_SERVICE_ROLE_KEY", ""))
     elif db_choice == "3":
         _print("\n[5/5] External PostgreSQL Database Credentials")
-        db_host = _prompt("DB Host")
-        db_port = _prompt("DB Port", default="5432")
-        db_name = _prompt("DB Name")
-        db_user = _prompt("DB User")
-        db_password = _prompt("DB Password", secret=True)
+        db_host = _prompt("DB Host", default=os.environ.get("DB_HOST", ""))
+        db_port = _prompt("DB Port", default=os.environ.get("DB_PORT", "5432"))
+        db_name = _prompt("DB Name", default=os.environ.get("DB_NAME", ""))
+        db_user = _prompt("DB User", default=os.environ.get("DB_USER", ""))
+        db_password = _prompt("DB Password", secret=True, default=os.environ.get("DB_PASSWORD", ""))
     else:
         _print("\n[5/5] Local SQLite selected. No database credentials required.")
 
@@ -187,6 +235,7 @@ def cmd_setup(args):
         "JIRA_API_TOKEN": jira_token,
         "GMAIL_ADDRESS": gmail_address,
         "GMAIL_APP_PASSWORD": gmail_app_password,
+        "USE_SUPABASE": use_supabase,
         "SUPABASE_URL": supabase_url,
         "SUPABASE_ANON_KEY": supabase_anon_key,
         "SUPABASE_SERVICE_ROLE_KEY": supabase_service_key,
@@ -472,7 +521,8 @@ Commands:
 
     sub = parser.add_subparsers(dest="command")
 
-    sub.add_parser("setup", help="Interactive API key and database setup wizard")
+    p_setup = sub.add_parser("setup", help="Interactive API key and database setup wizard")
+    p_setup.add_argument("--guide", action="store_true", help="Comprehensive installation guide mode with credential links")
 
     p_ollama = sub.add_parser("install-ollama", help="Install Ollama + pull LLM model")
     p_ollama.add_argument("--model", default="gemma3:1b", help="Model to pull (default: gemma3:1b)")
