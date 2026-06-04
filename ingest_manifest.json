@@ -1,0 +1,25 @@
+{
+  "ingest_completed_at": "2026-06-04T15:07:04.743333",
+  "elapsed_seconds": 0.03,
+  "sources": {
+    "jira": {
+      "status": "SKIPPED: JIRA_URL / JIRA_EMAIL / JIRA_API_TOKEN not configured",
+      "count": 0
+    },
+    "gmail": {
+      "status": "SKIPPED: GMAIL_ADDRESS / GMAIL_APP_PASSWORD not configured",
+      "count": 0
+    },
+    "slack": {
+      "status": "SKIPPED: SLACK_BOT_TOKEN not configured",
+      "count": 0
+    }
+  },
+  "total_indexed_this_run": 0,
+  "total_skipped_this_run": 0,
+  "grand_total_in_index": 0,
+  "total_unique_tags": 0,
+  "by_source": {},
+  "db_path": "C:\\Users\\91891\\.gemini\\antigravity-ide\\scratch\\ain-state-compiler\\context_index.db",
+  "ready_for_deployment": true
+}

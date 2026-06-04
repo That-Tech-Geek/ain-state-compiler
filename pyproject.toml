@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ain-state-compiler"
-version = "0.3.1"
+version = "0.3.2"
 description = "The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents."
 readme = "README.md"
 license = {text = "Proprietary — See LICENSE file"}

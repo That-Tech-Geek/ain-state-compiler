@@ -67,12 +67,18 @@ The output is not a document retrieval system — it is a **Company Brain**:
 pip install ain-state-compiler
 ```
 
+> [!TIP]
+> **Windows/PATH Notice**: If you get a command not recognized error for `ain-brain` (because python's scripts directory is not in your system `PATH`), you can substitute `ain-brain` with **`python -m ain_state_compiler`** (using underscores) for all commands.
+> 
+> Example: `python -m ain_state_compiler setup`
+
 ### First-Time Setup
 
 After installing, run the interactive setup wizard:
 
 ```bash
 ain-brain setup
+# Or fallback: python -m ain_state_compiler setup
 ```
 
 This will guide you through configuring:
