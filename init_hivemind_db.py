@@ -20,7 +20,8 @@ def init_db():
         channel TEXT NOT NULL,
         timestamp TEXT NOT NULL,
         user TEXT NOT NULL,
-        text TEXT NOT NULL
+        text TEXT NOT NULL,
+        UNIQUE(channel, timestamp)
     )
     """)
     

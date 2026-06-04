@@ -186,6 +186,18 @@ def orchestrate_ingest(project_dir):
 
     idx.close()
 
+    # Write newly ingested records back to the shared database (de-duplicated)
+    try:
+        from ain_state_compiler.sync import write_to_shared_db
+        write_to_shared_db(
+            project_dir,
+            results.get("slack", {}).get("records", []),
+            results.get("jira", {}).get("records", []),
+            results.get("gmail", {}).get("records", [])
+        )
+    except Exception as e:
+        print(f"[!] Error writing to shared central database: {e}")
+
     # Print readiness banner
     _print_ready_banner(manifest, t_elapsed)
 

@@ -122,7 +122,17 @@ def cmd_setup(args):
     _print("\n======================================================")
     _print("  AIN State Compiler -- Setup Wizard")
     _print("======================================================")
-    _print("  Press Enter to skip any field and set it later.\n")
+    _print("  Press Enter to skip any field and set it later.")
+    _print("  PowerShell Hint: You can also configure variables directly using:")
+    _print("  $env:SLACK_BOT_TOKEN=\"your-token\"")
+    _print("  $env:JIRA_URL=\"https://yourorg.atlassian.net\"")
+    _print("  $env:JIRA_EMAIL=\"email@domain.com\"")
+    _print("  $env:JIRA_API_TOKEN=\"your-api-token\"")
+    _print("  $env:GMAIL_ADDRESS=\"your-gmail@gmail.com\"")
+    _print("  $env:GMAIL_APP_PASSWORD=\"your-app-password\"")
+    _print("  $env:USE_SUPABASE=\"true\" (if using shared cloud hivemind)")
+    _print("  $env:SUPABASE_URL=\"https://xxx.supabase.co\"")
+    _print("  $env:SUPABASE_SERVICE_ROLE_KEY=\"service-role-key\"\n")
 
     # ---- Slack ----
     _print("[1/5] Slack Integration")

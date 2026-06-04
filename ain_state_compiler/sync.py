@@ -9,6 +9,7 @@ the sync will pull from Supabase instead of the local SQLite file.
 """
 
 import os
+import sys
 import json
 import sqlite3
 import urllib.request
@@ -114,6 +115,7 @@ def sync_from_hivemind(project_dir=None):
             project_dir = os.path.dirname(project_dir)
 
     _load_env_file(project_dir)
+    ensure_supabase_credentials(project_dir)
 
     mock_data_dir = os.path.join(project_dir, "mock_data")
     os.makedirs(mock_data_dir, exist_ok=True)
@@ -175,6 +177,156 @@ def sync_from_hivemind(project_dir=None):
         print("[+] Compilation summary written back to Supabase compile_log table.")
 
     return True
+
+
+def ensure_supabase_credentials(project_dir):
+    """
+    On module/device startup, checks if Supabase credentials are set.
+    If USE_SUPABASE is set to true/1, or if they are partially set,
+    prompts the user to enter them if stdin is interactive.
+    Saves them back to .env if inputted.
+    """
+    _load_env_file(project_dir)
+    supabase_url = os.environ.get("SUPABASE_URL", "").strip()
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    use_supabase_env = os.environ.get("USE_SUPABASE", "").strip().lower() in ("true", "1", "yes")
+
+    if (use_supabase_env or (supabase_url and not supabase_key) or (supabase_key and not supabase_url)) and not (supabase_url and supabase_key):
+        if sys.stdin.isatty():
+            print("\n======================================================")
+            print("  Supabase Credentials Required (Hivemind Cloud Mode)")
+            print("======================================================")
+            try:
+                url = input("  Enter Supabase URL (e.g. https://xxx.supabase.co): ").strip()
+                key = input("  Enter Supabase Service Role Key (admin/service-role): ").strip()
+                if url and key:
+                    os.environ["SUPABASE_URL"] = url
+                    os.environ["SUPABASE_SERVICE_ROLE_KEY"] = key
+                    # Save to .env using standard append/update helper
+                    env_path = os.path.join(project_dir, ".env")
+                    existing = {}
+                    if os.path.exists(env_path):
+                        with open(env_path, "r", encoding="utf-8") as f:
+                            for line in f:
+                                line = line.strip()
+                                if line and not line.startswith("#") and "=" in line:
+                                    k, _, v = line.partition("=")
+                                    existing[k.strip()] = v.strip()
+                    existing["SUPABASE_URL"] = url
+                    existing["SUPABASE_SERVICE_ROLE_KEY"] = key
+                    with open(env_path, "w", encoding="utf-8") as f:
+                        f.write("# AIN State Compiler Configuration\n")
+                        for k, v in existing.items():
+                            f.write(f"{k}={v}\n")
+                    print("[+] Supabase credentials saved to .env")
+                    return True
+            except (KeyboardInterrupt, EOFError):
+                print("\n[!] Skipping credential entry.")
+        else:
+            print("[!] Supabase configured but credentials missing and shell is non-interactive.")
+        return False
+    return True
+
+
+def write_to_shared_db(project_dir, slack_records, jira_records, email_records):
+    """
+    Writes newly ingested records back to the shared central database (SQLite or Supabase).
+    Automatically de-duplicates the database on every write.
+    """
+    _load_env_file(project_dir)
+    supabase_url = os.environ.get("SUPABASE_URL", "").strip()
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+    use_supabase = bool(supabase_url and supabase_key)
+
+    if use_supabase:
+        print(f"[*] Writing to shared cloud DB (Supabase) with de-duplication...")
+        # Format records for Supabase tables
+        if slack_records:
+            formatted_slack = []
+            for r in slack_records:
+                formatted_slack.append({
+                    "channel": r.get("channel", ""),
+                    "timestamp": r.get("ts") or r.get("timestamp", ""),
+                    "user": r.get("user", ""),
+                    "text": r.get("text", "")
+                })
+            _supabase_upsert(supabase_url, supabase_key, "slack_history", formatted_slack)
+            
+        if jira_records:
+            formatted_jira = []
+            for r in jira_records:
+                formatted_jira.append({
+                    "id": r.get("id", ""),
+                    "title": r.get("title", ""),
+                    "status": r.get("status", ""),
+                    "assignee": r.get("assignee", ""),
+                    "updated_at": r.get("updated_at", ""),
+                    "description": r.get("description", "")
+                })
+            _supabase_upsert(supabase_url, supabase_key, "jira_issues", formatted_jira)
+            
+        if email_records:
+            formatted_emails = []
+            for r in email_records:
+                formatted_emails.append({
+                    "id": r.get("id", ""),
+                    "subject": r.get("subject", ""),
+                    "sender": r.get("sender", ""),
+                    "timestamp": r.get("timestamp", ""),
+                    "body": r.get("body", "")
+                })
+            _supabase_upsert(supabase_url, supabase_key, "emails", formatted_emails)
+    else:
+        db_path = os.path.join(project_dir, "cloud_hivemind.db")
+        if not os.path.exists(db_path):
+            print(f"[*] Shared SQLite DB not found at {db_path}. Initializing...")
+            # We import init_db inline to prevent circular imports
+            import importlib.util
+            init_path = os.path.join(project_dir, "init_hivemind_db.py")
+            if os.path.exists(init_path):
+                spec = importlib.util.spec_from_file_location("init_hivemind_db", init_path)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                mod.init_db()
+            
+        print(f"[*] Writing to shared local DB ({db_path}) with de-duplication...")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Insert Slack records using INSERT OR IGNORE (with UNIQUE(channel, timestamp) constraint)
+        if slack_records:
+            slack_data = [
+                (r.get("channel", ""), r.get("ts") or r.get("timestamp", ""), r.get("user", ""), r.get("text", ""))
+                for r in slack_records
+            ]
+            cursor.executemany(
+                "INSERT OR IGNORE INTO slack_history (channel, timestamp, user, text) VALUES (?, ?, ?, ?)",
+                slack_data
+            )
+            
+        if jira_records:
+            jira_data = [
+                (r.get("id", ""), r.get("title", ""), r.get("status", ""), r.get("assignee", ""), r.get("updated_at", ""), r.get("description", ""))
+                for r in jira_records
+            ]
+            cursor.executemany(
+                "INSERT OR IGNORE INTO jira_issues (id, title, status, assignee, updated_at, description) VALUES (?, ?, ?, ?, ?, ?)",
+                jira_data
+            )
+            
+        if email_records:
+            email_data = [
+                (r.get("id", ""), r.get("subject", ""), r.get("sender", ""), r.get("timestamp", ""), r.get("body", ""))
+                for r in email_records
+            ]
+            cursor.executemany(
+                "INSERT OR IGNORE INTO emails (id, subject, sender, timestamp, body) VALUES (?, ?, ?, ?, ?)",
+                email_data
+            )
+            
+        conn.commit()
+        conn.close()
+        print("[+] Write and database de-duplication complete.")
 
 
 if __name__ == "__main__":
