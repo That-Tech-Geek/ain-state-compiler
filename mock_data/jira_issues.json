@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ENG-1043",
+    "title": "Rollout Analytics-v2 Module",
+    "status": "Done",
+    "assignee": "sara_devops",
+    "updated_at": "2026-06-04T09:00:00Z",
+    "description": "Deployment of core telemetry trackers. Code merged to main, deployed to production. Feature flag analytics_v2 toggled ON."
+  },
+  {
+    "id": "BI-402",
+    "title": "Configure Acme Corp Billing Account",
+    "status": "To Do",
+    "assignee": "billing_ops",
+    "updated_at": "2026-06-04T08:30:00Z",
+    "description": "Set up Acme Corp account on standard enterprise tiers ($10k/month recurring). Pending approval."
+  }
+]

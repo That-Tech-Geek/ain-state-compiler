@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIN State Compiler — Garry's G-Brain Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="logo-area">
+        <span class="pulse-dot"></span>
+        <h1>AIN STATE COMPILER</h1>
+        <span class="badge">G-BRAIN PROTOTYPE</span>
+        <div class="db-status-bar">
+          <span class="db-dot"></span>
+          <span class="db-text">HIVEMIND CLOUD DB:</span>
+          <span id="db-status-pill" class="status-pill status-active">CONNECTED</span>
+          <span class="sync-text">LAST SYNC: <span id="last-sync-time">JUST NOW</span></span>
+        </div>
+      </div>
+      <div class="actions-area">
+        <button id="btn-cron" class="btn-primary">
+          <span class="btn-icon">⚡</span> RUN OFF-HOURS CRON
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Column 1: Ingest Stream -->
+      <section class="grid-panel column-ingest">
+        <div class="panel-header">
+          <h2>📥 Raw Ingest streams</h2>
+          <span id="ingest-count" class="count-pill">0</span>
+        </div>
+        <div class="panel-desc">Listening to Google Workspace (Gmail), Slack WebSockets, and Jira issues.</div>
+        <div id="ingest-stream" class="stream-container">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Column 2: State Compiler & Contradictions -->
+      <section class="grid-panel column-state">
+        <div class="panel-header">
+          <h2>🔮 Compiled Operational State</h2>
+          <span id="conflict-count" class="count-pill status-red">0 Conflicts</span>
+        </div>
+        <div class="panel-desc">Layer 3: Resolving contradictions across siloed corporate channels to answer "What is True?".</div>
+        
+        <!-- Conflict Section -->
+        <div class="conflicts-section">
+          <h3>Active Contradictions</h3>
+          <div id="conflicts-container" class="conflicts-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- State Matrices -->
+        <div class="state-matrices-section">
+          <h3>Operational Truth Matrices</h3>
+          <div id="matrices-container" class="matrices-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Query Terminal -->
+        <div class="query-terminal-section">
+          <h3>On-Demand Query Terminal</h3>
+          <div class="query-box">
+            <input type="text" id="query-input" placeholder="Ask G-Brain a question (e.g. Acme pricing)...">
+            <button id="btn-query" class="btn-secondary">QUERY</button>
+          </div>
+          <div id="query-response-box" class="query-response-card hidden">
+            <div class="response-header">
+              <span class="response-badge">TRUTH RESULT</span>
+              <span class="response-meta">Source: <span id="response-source">node</span> | LLM: <span id="response-llm">OFFLINE</span></span>
+            </div>
+            <div id="query-response-text" class="response-text"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Column 3: IMM Modules & Token Optimization -->
+      <section class="grid-panel column-imm">
+        <div class="panel-header">
+          <h2>📜 Institutional Memory Modules</h2>
+        </div>
+        <div class="panel-desc">Executable state representations & token-savings appendix.</div>
+
+        <div class="imm-tabs">
+          <button class="tab-btn active" data-imm="product_deployment_imm">Product IMM</button>
+          <button class="tab-btn" data-imm="acme_corp_billing_imm">Billing IMM</button>
+          <button class="tab-btn" data-imm="operational_state">OEG (YAML)</button>
+        </div>
+
+        <div class="imm-viewer-container">
+          <pre id="imm-viewer"><code class="language-markdown">Loading module...</code></pre>
+        </div>
+
+        <!-- Token Savings Tracker -->
+        <div class="token-savings-panel">
+          <h3>Token Savings Optimizer (JSON → YAML)</h3>
+          <div class="savings-metrics">
+            <div class="metric-card">
+              <span class="metric-label">JSON Characters</span>
+              <span id="metric-json" class="metric-value">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">YAML Characters</span>
+              <span id="metric-yaml" class="metric-value">0</span>
+            </div>
+            <div class="metric-card highlight-green">
+              <span class="metric-label">Token Savings</span>
+              <span id="metric-percentage" class="metric-value">0%</span>
+            </div>
+          </div>
+          <div class="savings-footer">
+            Saved approx <strong id="metric-saved-tokens">0</strong> context window tokens by stripping brackets/quotes.
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Overlay Loader -->
+    <div id="overlay-loader" class="overlay hidden">
+      <div class="loader-content">
+        <div class="spinner"></div>
+        <h3>Compiling Organizational State...</h3>
+        <p>Reconciling Jira logs, parsing Slack tokens, and detecting operational contradictions.</p>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

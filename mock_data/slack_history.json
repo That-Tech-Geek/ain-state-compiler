@@ -1,0 +1,38 @@
+[
+  {
+    "channel": "production-alerts",
+    "timestamp": "2026-06-04T09:15:00Z",
+    "user": "alex_sre",
+    "text": "ALERT: Latency spiking on /checkout endpoint. CPU at 95% on primary DB replica. Checking pool connections."
+  },
+  {
+    "channel": "production-alerts",
+    "timestamp": "2026-06-04T09:18:00Z",
+    "user": "sara_devops",
+    "text": "Checking git blame. The DB leak looks tied to the `analytics-v2` rollout merged 30 mins ago. It doesn't close pool sessions on exceptions."
+  },
+  {
+    "channel": "production-alerts",
+    "timestamp": "2026-06-04T09:21:00Z",
+    "user": "alex_sre",
+    "text": "Agreed. I am disabling the feature flag `analytics_v2` globally. Rollout is paused. Checkout latency has normalized back to 45ms."
+  },
+  {
+    "channel": "production-alerts",
+    "timestamp": "2026-06-04T09:23:00Z",
+    "user": "jared_vp_eng",
+    "text": "Confirmed. Do not re-enable `analytics_v2` until we rewrite the connection pooling hook. Keep the flag set to FALSE."
+  },
+  {
+    "channel": "sales-leads",
+    "timestamp": "2026-06-04T10:05:00Z",
+    "user": "elena_sales",
+    "text": "Acme Corp is willing to close today if we can offer a 35% discount on Enterprise SaaS. Our standard policy cap is 25%. Can we get an exception?"
+  },
+  {
+    "channel": "sales-leads",
+    "timestamp": "2026-06-04T10:12:00Z",
+    "user": "marcus_vp_sales",
+    "text": "Acme is a key account. Approved override:Elena is authorized to close Acme Corp with a 35% discount. Standard pricing cap bypassed for this deal."
+  }
+]
