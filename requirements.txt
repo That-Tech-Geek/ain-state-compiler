@@ -1,0 +1,5 @@
+# ain-state-compiler: zero required dependencies
+# All core functionality uses Python stdlib only.
+# Optional development / build tools:
+build>=1.0
+twine>=5.0

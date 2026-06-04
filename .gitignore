@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Local databases and compiled state
+cloud_hivemind.db
+context_index.db
+compiled_state/
+*.log
+_register_task.ps1
+_ain_cron_sync.bat

@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ain-state-compiler"
+version = "0.2.0"
+description = "The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents."
+readme = "README.md"
+license = {text = "Proprietary — See LICENSE file"}
+authors = [
+    {name = "Sambit Mishra", email = "contact@ain-compiler.ai"}
+]
+keywords = [
+    "company-brain", "enterprise-ai", "knowledge-management",
+    "state-compiler", "offline-ai", "ollama", "supabase",
+    "institutional-memory", "ain", "g-brain"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Office/Business",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+server = []
+dev = [
+    "build",
+    "twine",
+]
+
+[project.scripts]
+ain-brain = "ain_state_compiler.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sambitmishra98/ain-state-compiler"
+Documentation = "https://github.com/sambitmishra98/ain-state-compiler#readme"
+Repository = "https://github.com/sambitmishra98/ain-state-compiler"
+"Bug Tracker" = "https://github.com/sambitmishra98/ain-state-compiler/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ain_state_compiler*"]
+
+[tool.setuptools.package-data]
+"ain_state_compiler" = ["*.md", "*.json", "*.yaml"]

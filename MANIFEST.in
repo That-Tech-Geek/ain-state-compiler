@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include ain_state_compiler *.py *.md *.json *.yaml
+recursive-include mock_data *.json
+recursive-include dashboard *.html *.css *.js
