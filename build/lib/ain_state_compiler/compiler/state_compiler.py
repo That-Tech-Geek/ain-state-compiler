@@ -46,20 +46,13 @@ class StateCompiler:
         email_path = os.path.join(self.mock_data_dir, "emails.json")
 
         with open(slack_path, "r", encoding="utf-8") as f:
-            raw_slack = json.load(f)
+            slack_data = json.load(f)
         with open(jira_path, "r", encoding="utf-8") as f:
-            raw_jira = json.load(f)
+            jira_data = json.load(f)
         with open(email_path, "r", encoding="utf-8") as f:
-            raw_email = json.load(f)
+            email_data = json.load(f)
 
-        from ain_state_compiler.ingest.loaders import DataLoader
-        loader = DataLoader(self.project_dir)
-
-        slack_nodes = loader.parse_slack(raw_slack)
-        jira_nodes = loader.parse_jira(raw_jira)
-        email_nodes = loader.parse_email(raw_email)
-
-        return slack_nodes, jira_nodes, email_nodes
+        return slack_data, jira_data, email_data
 
     def compile(self, human_in_the_loop: bool = False):
         """

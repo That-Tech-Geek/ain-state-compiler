@@ -84,38 +84,35 @@ class ConflictDetector:
         # ----------------------------------------------------------------
         # CON-001: Feature Flag vs GA Announcement
         # ----------------------------------------------------------------
-        slack_texts = [node.text_content for node in slack_data]
-        email_texts = [node.text_content + " " + node.subject for node in email_data]
-        jira_texts = [node.text_content for node in jira_data]
+        slack_texts = [e.get("text", "") for e in slack_data]
+        email_texts = [e.get("body", "") + " " + e.get("subject", "") for e in email_data]
+        jira_texts = [i.get("description", "") + " " + i.get("title", "") for i in jira_data]
 
         flag_disabled_evidence = [
-            node for node in slack_data if cls._text_matches(node.text_content, cls.FLAG_DISABLED_PATTERNS)
+            t for t in slack_texts if cls._text_matches(t, cls.FLAG_DISABLED_PATTERNS)
         ]
         ga_evidence = [
-            node for node in email_data if cls._text_matches(node.text_content + " " + node.subject, cls.GA_PATTERNS)
+            t for t in email_texts if cls._text_matches(t, cls.GA_PATTERNS)
         ]
         jira_done_evidence = [
-            node for node in jira_data if node.status.lower() == "done"
-            and ("analytics" in node.text_content.lower())
+            i for i in jira_data if i.get("status", "").lower() == "done"
+            and ("analytics" in i.get("title", "").lower() or "analytics" in i.get("description", "").lower())
         ]
 
         if flag_disabled_evidence and (ga_evidence or jira_done_evidence):
             evidence = []
             if jira_done_evidence:
                 evidence.append({
-                    "source": f"Jira [{jira_done_evidence[0].id}]",
-                    "assertion": f"Issue '{jira_done_evidence[0].metadata.get('title', '')}' is marked DONE -- implying live deployment."
+                    "source": "Jira",
+                    "assertion": f"Issue '{jira_done_evidence[0].get('title', '')}' is marked DONE -- implying live deployment."
                 })
             if ga_evidence:
                 evidence.append({
-                    "source": f"Email (Marketing) [{ga_evidence[0].id}]",
+                    "source": "Email (Marketing)",
                     "assertion": "GA announcement email sent to all enterprise customers."
                 })
-            
-            # Default fallback source string if no slack evidence matches directly (should exist based on if statement)
-            slack_src = f"Slack (#production-alerts) [{flag_disabled_evidence[0].id}]" if flag_disabled_evidence else "Slack (#production-alerts)"
             evidence.append({
-                "source": slack_src,
+                "source": "Slack (#production-alerts)",
                 "assertion": "SRE disabled feature flag analytics_v2 = FALSE to resolve checkout pool exhaustion."
             })
 
@@ -139,29 +136,31 @@ class ConflictDetector:
         # ----------------------------------------------------------------
         # CON-002: Sales Override vs Billing Config Lag
         # ----------------------------------------------------------------
-        override_slack = [node for node in slack_data if cls._text_matches(node.text_content, cls.OVERRIDE_PATTERNS)]
+        override_slack = [t for t in slack_texts if cls._text_matches(t, cls.OVERRIDE_PATTERNS)]
         billing_pending_jira = [
-            node for node in jira_data if cls._text_matches(node.text_content, cls.BILLING_PENDING_PATTERNS)
-            and "billing" in node.text_content.lower()
+            i for i in jira_data if cls._text_matches(
+                i.get("description", "") + " " + i.get("title", ""), cls.BILLING_PENDING_PATTERNS
+            )
+            and "billing" in (i.get("title", "") + i.get("description", "")).lower()
         ]
         customer_complaint_email = [
-            node for node in email_data if "discrepancy" in node.subject.lower()
-            or "discount" in node.text_content.lower()
+            e for e in email_data if "discrepancy" in e.get("subject", "").lower()
+            or "discount" in e.get("body", "").lower()
         ]
 
         if override_slack and billing_pending_jira:
             evidence = []
             evidence.append({
-                "source": f"Slack (#sales-leads) [{override_slack[0].id}]",
+                "source": "Slack (#sales-leads)",
                 "assertion": "VP Marcus authorized 35% discount override for Acme Corp -- verbal approval on Slack."
             })
             evidence.append({
-                "source": f"Jira [{billing_pending_jira[0].id}]",
-                "assertion": f"Billing task '{billing_pending_jira[0].id}' is still in To Do at standard pricing ($10,000/month)."
+                "source": "Jira",
+                "assertion": f"Billing task '{billing_pending_jira[0].get('id', '')}' is still in To Do at standard pricing ($10,000/month)."
             })
             if customer_complaint_email:
                 evidence.append({
-                    "source": f"Email (Customer) [{customer_complaint_email[0].id}]",
+                    "source": "Email (Customer)",
                     "assertion": "Acme Corp sent escalation email reporting invoice at standard rate, not agreed 35% discounted rate."
                 })
 

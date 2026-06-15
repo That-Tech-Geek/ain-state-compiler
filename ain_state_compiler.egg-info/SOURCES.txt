@@ -3,6 +3,7 @@ setup.py
 ain_state_compiler/__init__.py
 ain_state_compiler/__main__.py
 ain_state_compiler/cli.py
+ain_state_compiler/core_memory.py
 ain_state_compiler/db.py
 ain_state_compiler/mcp_server.py
 ain_state_compiler/ollama_plugin.py
@@ -16,6 +17,7 @@ ain_state_compiler.egg-info/top_level.txt
 ain_state_compiler/compiler/__init__.py
 ain_state_compiler/compiler/conflict_detector.py
 ain_state_compiler/compiler/lazy_gatekeepers.py
+ain_state_compiler/compiler/reducers.py
 ain_state_compiler/compiler/state_compiler.py
 ain_state_compiler/compiler/token_optimizer.py
 ain_state_compiler/ingest/__init__.py
@@ -23,5 +25,6 @@ ain_state_compiler/ingest/checkpoint.py
 ain_state_compiler/ingest/gmail_ingest.py
 ain_state_compiler/ingest/indexer.py
 ain_state_compiler/ingest/jira_ingest.py
+ain_state_compiler/ingest/loaders.py
 ain_state_compiler/ingest/orchestrator.py
 ain_state_compiler/ingest/slack_ingest.py
