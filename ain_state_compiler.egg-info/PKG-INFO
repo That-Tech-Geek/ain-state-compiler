@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: ain-state-compiler
-Version: 0.8.2
+Version: 0.8.3
 Summary: The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
 Home-page: https://github.com/That-Tech-Geek/ain-state-compiler
 Author: That-Tech-Geek
@@ -23,11 +23,52 @@ Dynamic: summary
 
 The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
 
-## New Features in v0.4.1: "Ponytail" Architecture
+## Overview
 
-Internalizes the spirit of the "lazy senior dev" reductionist mindset directly into the architecture:
+The `ain-state-compiler` operates 100% offline at the source level, parsing and aggregating enterprise communication and issue-tracking streams to produce internally consistent state representations. It prevents AI agents from executing against stale, fragmented, or conflicting corporate knowledge.
 
-- **Programmatic Gatekeepers**: Introduces `LazyStateFilter`, `StateReuseEngine`, and `StateCompilerEngine`.
-- **State Minimization**: A strictly deterministic programmatic "No-Op" Filter ensures payloads that do not mutate operational state are dropped before the LLM/AST generator is ever involved.
-- **Re-use Validation**: A historical state cache scanning mechanism allows identical or highly similar transformations to be cloned and adapted instead of running complex LLM compilation passes.
-- **Token/Complexity Penalties**: Forces rigid bounds (`max_tokens`, etc.) on underlying model calls. Ensures simple structures and fails early if code footprint becomes massive.
+### Key Outputs
+- **Institutional Memory Modules (IMMs)**: Markdown-based, human- and machine-readable state snapshots.
+- **Operational Execution Graphs (OEGs)**: Optimized YAML topologies representing resolution paths.
+- **Active Conflict Reports**: Discrepancy matrices identifying contradictions between engineering, marketing, and support data.
+
+## Installation
+
+```bash
+pip install ain-state-compiler
+```
+
+## Usage
+
+```python
+from ain_state_compiler.compiler import StateCompiler
+
+# The project directory should contain a 'mock_data' folder with slack_history.json, jira_issues.json, and emails.json
+compiler = StateCompiler(project_dir="/path/to/project")
+summary = compiler.compile()
+
+print(f"Processed {summary['processed_slack_events']} Slack events.")
+print(f"Detected {summary['detected_conflicts']} active state conflicts.")
+```
+
+## Core Architecture
+
+### "Ponytail" Lazy Gatekeepers
+Internalizes the spirit of the "lazy senior dev" reductionist mindset directly into the core architecture:
+- **LazyStateFilter**: A strict deterministic "No-Op" filter that drops incoming data if it does not meaningfully mutate the operational state.
+- **StateReuseEngine**: Scans a historical cache of previously resolved conflicts. If a highly similar transformation exists, the compiler clones and adapts rather than generating from scratch.
+- **StateCompilerEngine**: Enforces rigid bounds (`max_tokens`, length limits) on LLM compilation passes, aborting cleanly to naive primitives if structural code bloat occurs.
+
+### Conflict Detection & Optimization
+- **ConflictDetector**: Runs rule-based, deterministic logic to spot discrepancies before invoking generation.
+- **TokenOptimizer**: Compresses verbose JSON state outputs into highly dense YAML representations, minimizing token footprint for downstream agent ingestion.
+
+## Changelog
+
+### v0.8.2
+- **Rebranding**: Updated GitHub URLs and package author metadata to That-Tech-Geek.
+
+### v0.8.1
+- **Ponytail Architecture**: Introduced `LazyStateFilter`, `StateReuseEngine`, and `StateCompilerEngine` programmatic gatekeepers.
+- **State Minimization**: Implemented deterministic noise filtering and semantic hash comparisons to prevent unnecessary compilation.
+- **Token/Complexity Penalties**: Set rigid metric constraints for generative compilation steps to minimize complexity.
