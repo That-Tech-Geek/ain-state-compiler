@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ain-state-compiler",
-    version="0.9.0",
+    version="0.9.1",
     author="That-Tech-Geek",
     author_email="contact@ain-compiler.ai",
     description="The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.",
