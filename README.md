@@ -122,8 +122,8 @@ Internalizes the spirit of the "lazy senior dev" reductionist mindset directly i
 
 ## Changelog
 
-### v0.9.1 (Current)
-- **Extensive Documentation**: Added detailed execution guides for MCP Servers, Ollama Tooling, and CLI usage directly to the PyPI page.
+### v0.9.2 (Current)
+- **Extensive Documentation**: Added detailed execution guides for MCP Servers, Ollama Tooling, and CLI usage directly to the PyPI page. Fixed Windows emoji encoding bugs during packaging.
 
 ### v0.9.0
 - **LLM-Native Retrieval Revamp**: Shifted away from raw Markdown context dumps to token-efficient Retrieval-Augmented Generation (RAG).
