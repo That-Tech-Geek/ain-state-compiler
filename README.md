@@ -6,7 +6,10 @@ The **G-Brain Company Brain Primitive**: continuously compiles Slack, Jira, and 
 
 The `ain-state-compiler` operates 100% offline at the source level, parsing and aggregating enterprise communication and issue-tracking streams to produce internally consistent state representations. It prevents AI agents from executing against stale, fragmented, or conflicting corporate knowledge.
 
-With the release of `v0.9.x`, we have transitioned from raw, unbounded markdown file generation to **token-efficient Retrieval-Augmented Generation (RAG)**, backed by a lightning-fast SQLite FTS5 backend. You can now securely mount your corporate brain directly into your favorite agent IDEs!
+With the release of **v1.0.0**, `ain-state-compiler` graduates to an enterprise-grade agentic framework by incorporating industry-standard paradigms:
+- **LangGraph-style Explicit Conflict Reducers** and Human-in-the-Loop interventions.
+- **LlamaIndex-style Structured Data Extraction** using typed schemas.
+- **MemGPT/Letta-style Core Memory Editing Tools** for long-term agent state persistence.
 
 ---
 
@@ -49,6 +52,8 @@ python -m ain_state_compiler.mcp_server
 **Available Tools:**
 - `search_ain_context(query_text: str, limit: int)`: BM25 Semantic Search for unstructured questions (e.g. "Why did the analytics migration fail?").
 - `search_ain_by_tag(tag: str, limit: int)`: Exact O(1) matching for specific entities (e.g. "acme_billing").
+- `edit_core_memory_replace(key: str, value: str)`: MemGPT-style tool to rewrite agent instructions and persona.
+- `edit_core_memory_append(key: str, value: str)`: MemGPT-style tool to maintain long-term internal monologue over weeks or months.
 
 ### 2. Native Ollama Integration
 **Target Audience**: Local LLM Developers.
@@ -74,10 +79,16 @@ The CLI allows you to trigger syncing, ingestion, and offline queries.
 ain-brain init-db
 ```
 
-**Ingest from Sources:**
-(Pulls from your configured Jira, Slack, and Email APIs)
+**Ingest from Sources (LlamaIndex-style Typed Extraction):**
+(Pulls from your configured Jira, Slack, and Email APIs, mapping them directly into Pydantic-style Python dataclasses).
 ```bash
 ain-brain ingest
+```
+
+**Sync with Human-in-the-Loop Reducers:**
+(Runs a one-shot compilation and pauses if LangGraph-style heuristic reducers cannot automatically resolve a conflicting state).
+```bash
+ain-brain sync --human-in-the-loop
 ```
 
 **Run a Query:**
@@ -114,15 +125,28 @@ Internalizes the spirit of the "lazy senior dev" reductionist mindset directly i
 - **StateReuseEngine**: Scans a historical cache of previously resolved conflicts. If a highly similar transformation exists, the compiler clones and adapts rather than generating from scratch.
 - **StateCompilerEngine**: Enforces rigid bounds (`max_tokens`, length limits) on LLM compilation passes, aborting cleanly to naive primitives if structural code bloat occurs.
 
-### Conflict Detection & Optimization
+### Conflict Detection & LangGraph Reducers
 - **ConflictDetector**: Runs rule-based, deterministic logic to spot discrepancies before invoking generation.
-- **TokenOptimizer**: Compresses verbose JSON state outputs into highly dense YAML representations, minimizing token footprint for downstream agent ingestion.
+- **ReducerRegistry**: Define custom Python functions to merge conflicts programmatically. If no reducer matches, falls back to an optional `--human-in-the-loop` prompt.
+- **TokenOptimizer**: Compresses verbose JSON state outputs into highly dense YAML representations, minimizing token footprint.
+
+### Data Loaders & Schemas (LlamaIndex Paradigm)
+- **DataLoaders**: Unstructured inputs are instantly mapped into structured `DocumentNode` schemas (e.g. `SlackMessageNode`, `JiraIssueNode`).
+
+### Virtual Memory (MemGPT Paradigm)
+- **CoreMemory**: Provides explicit CRUD tools allowing the agent LLM to self-edit its own prompt context indefinitely, surviving reboots and cache clears.
 
 ---
 
 ## Changelog
 
-### v0.9.2 (Current)
+### v1.0.0 (Current)
+- **LangGraph Reducers**: Introduced `ReducerRegistry` to programmatically resolve state merge conflicts.
+- **Human in the Loop**: Added `--human-in-the-loop` to `ain-brain sync` CLI command.
+- **LlamaIndex Schemas**: Introduced `ain_state_compiler.ingest.loaders.DataLoader` to enforce Pydantic-like dataclass typing on ingest streams.
+- **Letta/MemGPT Core Memory**: Introduced `ain_state_compiler.core_memory.CoreMemory` and exposed explicit `edit_core_memory` self-editing tools to MCP and Ollama pipelines.
+
+### v0.9.2
 - **Extensive Documentation**: Added detailed execution guides for MCP Servers, Ollama Tooling, and CLI usage directly to the PyPI page. Fixed Windows emoji encoding bugs during packaging.
 
 ### v0.9.0

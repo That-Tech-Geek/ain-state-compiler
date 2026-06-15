@@ -395,9 +395,10 @@ Register-ScheduledTask -TaskName "{task_name}" -Trigger $trigger -Action $action
 def cmd_sync(args):
     """Run a one-shot sync + offline state compilation."""
     project_dir = _find_project_dir()
+    human = getattr(args, "human_in_the_loop", False)
     _print("\n[*] Running one-shot hivemind sync + compile...")
     from ain_state_compiler.sync import sync_from_hivemind
-    success = sync_from_hivemind(project_dir)
+    success = sync_from_hivemind(project_dir, human_in_the_loop=human)
     if success:
         _print("[+] Sync and compilation complete.")
     else:
@@ -578,7 +579,8 @@ Commands:
         "--clear-checkpoint", dest="clear_checkpoint", action="store_true",
         help="Clear saved cursors so next ingest starts from scratch (for selected --source or all)"
     )
-    sub.add_parser("sync", help="Run a one-shot sync + compile now")
+    p_sync = sub.add_parser("sync", help="Run a one-shot sync + compile now")
+    p_sync.add_argument("--human-in-the-loop", action="store_true", help="Pause and prompt for human override on state conflicts")
 
     p_query = sub.add_parser("query", help="Ask the Company Brain a question")
     p_query.add_argument("text", nargs="+", help="Query text")

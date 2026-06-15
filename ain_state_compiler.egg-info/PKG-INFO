@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: ain-state-compiler
-Version: 0.8.3
+Version: 0.9.2
 Summary: The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
 Home-page: https://github.com/That-Tech-Geek/ain-state-compiler
 Author: That-Tech-Geek
@@ -19,39 +19,115 @@ Dynamic: home-page
 Dynamic: requires-python
 Dynamic: summary
 
-# ain-state-compiler
+# AIN State Compiler
 
-The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
+The **G-Brain Company Brain Primitive**: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
 
 ## Overview
 
 The `ain-state-compiler` operates 100% offline at the source level, parsing and aggregating enterprise communication and issue-tracking streams to produce internally consistent state representations. It prevents AI agents from executing against stale, fragmented, or conflicting corporate knowledge.
 
-### Key Outputs
-- **Institutional Memory Modules (IMMs)**: Markdown-based, human- and machine-readable state snapshots.
-- **Operational Execution Graphs (OEGs)**: Optimized YAML topologies representing resolution paths.
-- **Active Conflict Reports**: Discrepancy matrices identifying contradictions between engineering, marketing, and support data.
+With the release of `v0.9.x`, we have transitioned from raw, unbounded markdown file generation to **token-efficient Retrieval-Augmented Generation (RAG)**, backed by a lightning-fast SQLite FTS5 backend. You can now securely mount your corporate brain directly into your favorite agent IDEs!
 
-## Installation
+---
+
+## 🚀 Installation
 
 ```bash
 pip install ain-state-compiler
 ```
 
-## Usage
+Ensure that you have Python 3.9+ installed. For the MCP and Ollama integrations, you must have the respective local dependencies running.
+
+---
+
+## 🛠️ Detailed Execution & Usage Guide
+
+We provide multiple interfaces depending on your exact integration needs.
+
+### 1. Model Context Protocol (MCP) Server
+**Target Audience**: Claude Desktop, Cursor, Codex users.
+
+The `ain-state-compiler` natively exposes the Model Context Protocol via `FastMCP`. Instead of copying and pasting internal slack logs into your agent window, just mount the MCP server!
+
+**How to Start the Server:**
+```bash
+python -m ain_state_compiler.mcp_server
+```
+
+**Claude Desktop Configuration (`claude_desktop_config.json`):**
+```json
+{
+  "mcpServers": {
+    "ain-brain": {
+      "command": "python",
+      "args": ["-m", "ain_state_compiler.mcp_server"]
+    }
+  }
+}
+```
+
+**Available Tools:**
+- `search_ain_context(query_text: str, limit: int)`: BM25 Semantic Search for unstructured questions (e.g. "Why did the analytics migration fail?").
+- `search_ain_by_tag(tag: str, limit: int)`: Exact O(1) matching for specific entities (e.g. "acme_billing").
+
+### 2. Native Ollama Integration
+**Target Audience**: Local LLM Developers.
+
+If you are running `ollama` locally, you can route queries securely through native tool-calling pipelines.
+
+**Usage:**
+```python
+from ain_state_compiler.ollama_plugin import run_query_with_tools
+
+# The plugin will automatically invoke `search_context` tools behind the scenes!
+answer = run_query_with_tools("What did Sara say about the latency spike?", model="gemma3:1b")
+print(answer)
+```
+
+### 3. Command Line Interface (CLI)
+**Target Audience**: DevOps & CI/CD Pipelines.
+
+The CLI allows you to trigger syncing, ingestion, and offline queries.
+
+**Initialize the Internal Database:**
+```bash
+ain-brain init-db
+```
+
+**Ingest from Sources:**
+(Pulls from your configured Jira, Slack, and Email APIs)
+```bash
+ain-brain ingest
+```
+
+**Run a Query:**
+(This invokes the Ollama tool-calling pipeline if running, or falls back to deterministic resolvers).
+```bash
+ain-brain query "analytics latency"
+```
+
+### 4. Python SDK Usage
+**Target Audience**: Backend Engineers building custom agent frameworks.
 
 ```python
 from ain_state_compiler.compiler import StateCompiler
+from ain_state_compiler.retrieval import search_context
 
-# The project directory should contain a 'mock_data' folder with slack_history.json, jira_issues.json, and emails.json
+# 1. Compile state and detect conflicts
 compiler = StateCompiler(project_dir="/path/to/project")
 summary = compiler.compile()
-
-print(f"Processed {summary['processed_slack_events']} Slack events.")
 print(f"Detected {summary['detected_conflicts']} active state conflicts.")
+
+# 2. Programmatically Retrieve specific snippets
+results = search_context("analytics_v2", limit=3, project_dir="/path/to/project")
+for snippet in results:
+    print(snippet)
 ```
 
-## Core Architecture
+---
+
+## 🧠 Core Architecture
 
 ### "Ponytail" Lazy Gatekeepers
 Internalizes the spirit of the "lazy senior dev" reductionist mindset directly into the core architecture:
@@ -63,12 +139,22 @@ Internalizes the spirit of the "lazy senior dev" reductionist mindset directly i
 - **ConflictDetector**: Runs rule-based, deterministic logic to spot discrepancies before invoking generation.
 - **TokenOptimizer**: Compresses verbose JSON state outputs into highly dense YAML representations, minimizing token footprint for downstream agent ingestion.
 
+---
+
 ## Changelog
 
-### v0.8.2
+### v0.9.2 (Current)
+- **Extensive Documentation**: Added detailed execution guides for MCP Servers, Ollama Tooling, and CLI usage directly to the PyPI page. Fixed Windows emoji encoding bugs during packaging.
+
+### v0.9.0
+- **LLM-Native Retrieval Revamp**: Shifted away from raw Markdown context dumps to token-efficient Retrieval-Augmented Generation (RAG).
+- **FTS5 Fast Search**: Extracted tight, context-rich snippets (truncated to scale) instead of unbounded document loads.
+- **MCP Server**: Added `mcp_server.py` using `FastMCP` exposing `search_ain_context` and `search_ain_by_tag` to tools like Claude Desktop and Codex.
+- **Native Ollama Tools**: Added `ollama_plugin.py` to route local queries securely through tool-calling pipelines.
+
+### v0.8.3
 - **Rebranding**: Updated GitHub URLs and package author metadata to That-Tech-Geek.
 
 ### v0.8.1
-- **Ponytail Architecture**: Introduced `LazyStateFilter`, `StateReuseEngine`, and `StateCompilerEngine` programmatic gatekeepers.
-- **State Minimization**: Implemented deterministic noise filtering and semantic hash comparisons to prevent unnecessary compilation.
-- **Token/Complexity Penalties**: Set rigid metric constraints for generative compilation steps to minimize complexity.
+- **Ponytail Architecture**: Introduced programmatic gatekeepers.
+- **State Minimization**: Implemented deterministic noise filtering.

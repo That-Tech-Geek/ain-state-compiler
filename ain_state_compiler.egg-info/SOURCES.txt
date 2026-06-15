@@ -4,7 +4,10 @@ ain_state_compiler/__init__.py
 ain_state_compiler/__main__.py
 ain_state_compiler/cli.py
 ain_state_compiler/db.py
+ain_state_compiler/mcp_server.py
+ain_state_compiler/ollama_plugin.py
 ain_state_compiler/query.py
+ain_state_compiler/retrieval.py
 ain_state_compiler/sync.py
 ain_state_compiler.egg-info/PKG-INFO
 ain_state_compiler.egg-info/SOURCES.txt

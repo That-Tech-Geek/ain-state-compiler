@@ -6,7 +6,7 @@ state mismatches in real-time.
 """
 
 import re
-
+from ain_state_compiler.compiler.reducers import StateConflict
 
 class ConflictDetector:
     """
@@ -116,22 +116,22 @@ class ConflictDetector:
                 "assertion": "SRE disabled feature flag analytics_v2 = FALSE to resolve checkout pool exhaustion."
             })
 
-            conflicts.append({
-                "id": "CON-001",
-                "category": "PRODUCT",
-                "title": "Feature Flag Rollback vs GA Announcement Discrepancy",
-                "severity": "CRITICAL",
-                "summary": (
+            conflicts.append(StateConflict(
+                id="CON-001",
+                category="PRODUCT",
+                title="Feature Flag Rollback vs GA Announcement Discrepancy",
+                severity="CRITICAL",
+                summary=(
                     "Marketing announced General Availability of Analytics v2, "
                     "but SRE globally disabled feature flag analytics_v2=FALSE due to DB connection pool leaks."
                 ),
-                "evidence": evidence,
-                "resolution_action": (
+                evidence=evidence,
+                resolution_action=(
                     "HALT GA marketing until SRE re-enables flag. "
                     "Update ENG-1043 Jira status to BLOCKED. "
                     "Issue customer notice if any customer has already activated analytics v2."
                 )
-            })
+            ))
 
         # ----------------------------------------------------------------
         # CON-002: Sales Override vs Billing Config Lag
@@ -164,21 +164,21 @@ class ConflictDetector:
                     "assertion": "Acme Corp sent escalation email reporting invoice at standard rate, not agreed 35% discounted rate."
                 })
 
-            conflicts.append({
-                "id": "CON-002",
-                "category": "BILLING",
-                "title": "Verbal Discount Override vs Billing System Configuration Lag",
-                "severity": "HIGH",
-                "summary": (
+            conflicts.append(StateConflict(
+                id="CON-002",
+                category="BILLING",
+                title="Verbal Discount Override vs Billing System Configuration Lag",
+                severity="HIGH",
+                summary=(
                     "VP Sales Marcus verbally approved 35% discount for Acme Corp on Slack, "
                     "but the billing system (Jira BI-402) is unconfigured and still invoicing at standard rate."
                 ),
-                "evidence": evidence,
-                "resolution_action": (
+                evidence=evidence,
+                resolution_action=(
                     "Update Jira BI-402 to reflect Marcus override token MARCUS_OVERRIDE_35. "
                     "Reconfigure Acme Corp account to $6,500/month (35% off $10k). "
                     "Email Acme Corp confirming corrected invoice within 24 hours."
                 )
-            })
+            ))
 
         return conflicts

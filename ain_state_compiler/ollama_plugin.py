@@ -6,6 +6,7 @@ Exposes the token-efficient retrieval module as native tools for local Ollama mo
 
 import os
 from ain_state_compiler.retrieval import search_context, search_by_tag
+from ain_state_compiler.core_memory import CoreMemory
 
 try:
     import ollama
@@ -17,10 +18,23 @@ def is_ollama_available():
     return ollama is not None
 
 
+def edit_core_memory_replace(key: str, value: str) -> str:
+    """Overwrites a core memory block entirely."""
+    mem = CoreMemory(os.getcwd())
+    mem.core_memory_replace(key, value)
+    return f"Successfully replaced core memory block '{key}'."
+
+def edit_core_memory_append(key: str, value: str) -> str:
+    """Appends text to a core memory block."""
+    mem = CoreMemory(os.getcwd())
+    mem.core_memory_append(key, value)
+    return f"Successfully appended to core memory block '{key}'."
+
+
 def run_query_with_tools(query_text: str, model: str = "gemma3:1b"):
     """
-    Run a query against Ollama, providing it the search_context and search_by_tag tools.
-    The LLM will iteratively use these tools to fetch data before responding.
+    Run a query against Ollama, providing it the retrieval and memory tools.
+    The LLM will iteratively use these tools to fetch data or edit its memory before responding.
     """
     if not is_ollama_available():
         return "Error: The 'ollama' python package is not installed."
@@ -32,7 +46,9 @@ def run_query_with_tools(query_text: str, model: str = "gemma3:1b"):
                 "You are the AIN Company Brain assistant. You have access to tools that can search the "
                 "company's internal communications (Slack, Jira, Email). "
                 "If the user asks a specific question about the company, ALWAYS use `search_context` "
-                "or `search_by_tag` to look up the answer. Do not guess."
+                "or `search_by_tag` to look up the answer. Do not guess.\n"
+                "You also have a core memory block you can edit via `edit_core_memory_replace` and `edit_core_memory_append` "
+                "to maintain long-term state across sessions."
             )
         },
         {
@@ -43,7 +59,9 @@ def run_query_with_tools(query_text: str, model: str = "gemma3:1b"):
 
     available_functions = {
         "search_context": search_context,
-        "search_by_tag": search_by_tag
+        "search_by_tag": search_by_tag,
+        "edit_core_memory_replace": edit_core_memory_replace,
+        "edit_core_memory_append": edit_core_memory_append,
     }
 
     try:
@@ -51,7 +69,7 @@ def run_query_with_tools(query_text: str, model: str = "gemma3:1b"):
         response = ollama.chat(
             model=model,
             messages=messages,
-            tools=[search_context, search_by_tag]
+            tools=[search_context, search_by_tag, edit_core_memory_replace, edit_core_memory_append]
         )
 
         messages.append(response["message"])

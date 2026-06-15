@@ -162,7 +162,7 @@ def sync_from_hivemind(project_dir=None):
     print("[*] Recompiling local Organizational State (Offline, Zero-LLM)...")
     from ain_state_compiler.compiler.state_compiler import StateCompiler
     compiler = StateCompiler(project_dir)
-    summary = compiler.compile()
+    summary = compiler.compile(human_in_the_loop=human_in_the_loop)
     print(f"[+] Compilation complete. Conflicts detected: {summary['detected_conflicts']}.")
 
     # Optionally write compilation summary back to Supabase

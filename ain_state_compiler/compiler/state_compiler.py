@@ -54,7 +54,7 @@ class StateCompiler:
 
         return slack_data, jira_data, email_data
 
-    def compile(self):
+    def compile(self, human_in_the_loop: bool = False):
         """
         Processes event logs, detects conflicts, and writes compiled artifacts.
 
@@ -63,7 +63,11 @@ class StateCompiler:
         slack_data, jira_data, email_data = self.load_data()
 
         # Offline contradiction detection (no LLM)
-        conflicts = ConflictDetector.detect_conflicts(slack_data, jira_data, email_data)
+        from ain_state_compiler.compiler.reducers import default_registry
+        raw_conflicts = ConflictDetector.detect_conflicts(slack_data, jira_data, email_data)
+        
+        # Pass conflicts through Reducer Pipeline
+        conflicts = [default_registry.reduce(c, human_in_the_loop=human_in_the_loop) for c in raw_conflicts]
 
         # Write IMMs and OEGs
         self.write_product_imm(slack_data, jira_data, email_data, conflicts)
@@ -81,7 +85,7 @@ class StateCompiler:
 
     def write_product_imm(self, slack, jira, emails, conflicts):
         """Compiles the Product Deployment Institutional Memory Module (IMM)."""
-        has_conflict = any(c["id"] == "CON-001" for c in conflicts)
+        has_conflict = any(c.id == "CON-001" for c in conflicts)
         status_str = "DISCREPANCY DETECTED" if has_conflict else "STABLE"
 
         content = f"""---
@@ -115,7 +119,7 @@ If customer reports loading error or latency spikes on checkout:
 
     def write_billing_imm(self, slack, jira, emails, conflicts):
         """Compiles the Billing Configuration Institutional Memory Module (IMM)."""
-        has_conflict = any(c["id"] == "CON-002" for c in conflicts)
+        has_conflict = any(c.id == "CON-002" for c in conflicts)
         status_str = "DISCREPANCY DETECTED" if has_conflict else "STABLE"
 
         content = f"""---
@@ -158,14 +162,14 @@ Total Active Conflicts: {len(conflicts)}
 
 """
         for c in conflicts:
-            report_md += f"""## [{c['severity']}] {c['title']} ({c['id']})
-* **Category**: {c['category']}
-* **Summary**: {c['summary']}
-* **Suggested Resolution**: {c['resolution_action']}
+            report_md += f"""## [{c.severity}] {c.title} ({c.id})
+* **Category**: {c.category}
+* **Summary**: {c.summary}
+* **Suggested Resolution**: {c.resolution_action}
 
 ### Evidence Collected:
 """
-            for ev in c["evidence"]:
+            for ev in c.evidence:
                 report_md += f"- **{ev['source']}**: {ev['assertion']}\n"
             report_md += "\n---\n\n"
 
@@ -181,13 +185,13 @@ Total Active Conflicts: {len(conflicts)}
                 "timestamp": datetime.now().isoformat(),
                 "conflict_disputes": [
                     {
-                        "id": c["id"],
-                        "category": c["category"],
-                        "title": c["title"],
-                        "severity": c["severity"],
-                        "summary": c["summary"],
-                        "evidence": [ev["assertion"] for ev in c["evidence"]],
-                        "resolution": c["resolution_action"],
+                        "id": c.id,
+                        "category": c.category,
+                        "title": c.title,
+                        "severity": c.severity,
+                        "summary": c.summary,
+                        "evidence": [ev["assertion"] for ev in c.evidence],
+                        "resolution": c.resolution_action,
                     }
                     for c in conflicts
                 ],
