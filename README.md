@@ -21,6 +21,13 @@ pip install ain-state-compiler
 
 Ensure that you have Python 3.9+ installed. For the MCP and Ollama integrations, you must have the respective local dependencies running.
 
+## 🛡️ Security & Trust Posture
+
+`ain-state-compiler` is built to run entirely inside your isolated network. To guarantee supply-chain integrity, we explicitly adhere to the highest open-source security standards:
+- **Trusted Publishing (OIDC)**: This package is built and signed directly via GitHub Actions using OpenID Connect (OIDC). There are no static passwords, ensuring **100% cryptographic source-to-binary alignment** on PyPI.
+- **Zero External Dependencies**: We deliberately shun heavy 3rd-party dependencies like `pydantic`. The entire core is built using Python standard libraries (e.g. `dataclasses`), eliminating deeply nested supply-chain vectors and dependency confusion risks.
+- **100% Offline by Default**: The entire compilation engine processes local data. If LLM evaluation is enabled via `AutoDebugger`, it binds to **local Ollama instances** natively—no telemetry, no cloud webhooks, no OpenAI API keys needed.
+
 ---
 
 ## 🛠️ Detailed Execution & Usage Guide
