@@ -1,9 +1,9 @@
 Metadata-Version: 2.4
 Name: ain-state-compiler
-Version: 0.8.1
+Version: 0.8.2
 Summary: The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
-Home-page: https://github.com/sambitmishra98/ain-state-compiler
-Author: Sambit Mishra
+Home-page: https://github.com/That-Tech-Geek/ain-state-compiler
+Author: That-Tech-Geek
 Author-email: contact@ain-compiler.ai
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: Other/Proprietary License
