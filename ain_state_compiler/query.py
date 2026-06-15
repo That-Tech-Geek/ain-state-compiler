@@ -31,7 +31,7 @@ def _find_state_dir(project_dir=None):
 
 def query_brain(query_text, project_dir=None, model="gemma3:1b"):
     """
-    Query the Company Brain.
+    Query the Company Brain using the native Ollama plugin for token-efficient retrieval.
 
     Args:
         query_text: Natural language question.
@@ -41,67 +41,19 @@ def query_brain(query_text, project_dir=None, model="gemma3:1b"):
     Returns:
         (answer: str, source_node: str, is_llm: bool)
     """
-    state_dir = _find_state_dir(project_dir)
-
-    context_files = {
-        "product": os.path.join(state_dir, "product_deployment_imm.md"),
-        "billing": os.path.join(state_dir, "acme_corp_billing_imm.md"),
-        "conflicts": os.path.join(state_dir, "active_conflicts_report.md"),
-        "oeg": os.path.join(state_dir, "operational_state.yaml"),
-    }
-
-    # Offline context selection (zero-LLM)
-    query_lower = query_text.lower()
-    selected_context = ""
-    source_node = "global"
-
-    if any(k in query_lower for k in ["product", "flag", "deployment", "analytics", "checkout", "sre", "rollout"]):
-        source_node = "product_deployment_imm.md"
-        ctx_path = context_files["product"]
-    elif any(k in query_lower for k in ["billing", "acme", "discount", "marcus", "price", "invoice", "saas"]):
-        source_node = "acme_corp_billing_imm.md"
-        ctx_path = context_files["billing"]
-    elif any(k in query_lower for k in ["conflict", "mismatch", "discrepancy", "contradiction", "issue"]):
-        source_node = "active_conflicts_report.md"
-        ctx_path = context_files["conflicts"]
-    else:
-        source_node = "operational_state.yaml"
-        ctx_path = context_files["oeg"]
-
-    if os.path.exists(ctx_path):
-        with open(ctx_path, "r", encoding="utf-8") as f:
-            selected_context = f.read()
-    else:
-        selected_context = "No compiled state found. Run `ain-brain sync` to compile first."
-
-    # Build LLM prompt
-    prompt = (
-        "You are the AIN Company Brain assistant. "
-        "Answer the user query using ONLY the provided compiled operational state context. "
-        "If the query cannot be answered by the context, state that clearly.\n\n"
-        f"[COMPILED CORPORATE CONTEXT]:\n{selected_context}\n\n"
-        f"[USER QUERY]:\n{query_text}\n\nAnswer:"
-    )
-
-    # Attempt local Ollama inference
-    ollama_url = "http://localhost:11434/api/generate"
-    payload = json.dumps({"model": model, "prompt": prompt, "stream": False}).encode("utf-8")
-    req = urllib.request.Request(
-        ollama_url,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-    )
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            res_data = json.loads(resp.read().decode("utf-8"))
-            answer = res_data.get("response", "").strip()
-            return answer, source_node, True
-    except Exception:
-        pass
+        from ain_state_compiler.ollama_plugin import is_ollama_available, run_query_with_tools
+    except ImportError:
+        def is_ollama_available(): return False
+        run_query_with_tools = None
+
+    if is_ollama_available():
+        answer = run_query_with_tools(query_text, model=model)
+        return answer, "ollama_tool_plugin", True
 
     # Fallback: deterministic state resolver
-    fallback = _deterministic_resolve(query_lower)
-    return fallback, source_node, False
+    fallback = _deterministic_resolve(query_text.lower())
+    return fallback, "deterministic_fallback", False
 
 
 def _deterministic_resolve(query_lower):

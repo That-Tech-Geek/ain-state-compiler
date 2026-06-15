@@ -44,7 +44,13 @@ Internalizes the spirit of the "lazy senior dev" reductionist mindset directly i
 
 ## Changelog
 
-### v0.8.2
+### v0.9.0 (Current)
+- **LLM-Native Retrieval Revamp**: Shifted away from raw Markdown context dumps to token-efficient Retrieval-Augmented Generation (RAG).
+- **FTS5 Fast Search**: Extracted tight, context-rich snippets (truncated to scale) instead of unbounded document loads.
+- **MCP Server**: Added `mcp_server.py` using `FastMCP` exposing `search_ain_context` and `search_ain_by_tag` to tools like Claude Desktop and Codex.
+- **Native Ollama Tools**: Added `ollama_plugin.py` to route local queries securely through tool-calling pipelines.
+
+### v0.8.3
 - **Rebranding**: Updated GitHub URLs and package author metadata to That-Tech-Geek.
 
 ### v0.8.1
