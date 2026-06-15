@@ -1,0 +1,33 @@
+Metadata-Version: 2.4
+Name: ain-state-compiler
+Version: 0.4.1
+Summary: The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
+Home-page: https://github.com/sambitmishra98/ain-state-compiler
+Author: Sambit Mishra
+Author-email: contact@ain-compiler.ai
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: Other/Proprietary License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-python
+Dynamic: summary
+
+# ain-state-compiler
+
+The G-Brain Company Brain Primitive: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
+
+## New Features in v0.4.1: "Ponytail" Architecture
+
+Internalizes the spirit of the "lazy senior dev" reductionist mindset directly into the architecture:
+
+- **Programmatic Gatekeepers**: Introduces `LazyStateFilter`, `StateReuseEngine`, and `StateCompilerEngine`.
+- **State Minimization**: A strictly deterministic programmatic "No-Op" Filter ensures payloads that do not mutate operational state are dropped before the LLM/AST generator is ever involved.
+- **Re-use Validation**: A historical state cache scanning mechanism allows identical or highly similar transformations to be cloned and adapted instead of running complex LLM compilation passes.
+- **Token/Complexity Penalties**: Forces rigid bounds (`max_tokens`, etc.) on underlying model calls. Ensures simple structures and fails early if code footprint becomes massive.
