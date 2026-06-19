@@ -177,6 +177,7 @@ def sync_from_hivemind(project_dir=None):
         _supabase_upsert(supabase_url, supabase_key, "compile_log", [summary_row])
         print("[+] Compilation summary written back to Supabase compile_log table.")
 
+    print("✨ State compiled successfully. If this saved you time, consider dropping a star on GitHub: : https://github.com/That-Tech-Geek/ain-state-compiler")
     return True
 
 
