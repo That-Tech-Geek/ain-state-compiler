@@ -1,6 +1,6 @@
 # AIN State Compiler
 
-The **G-Brain Company Brain Primitive**: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
+The **AIN Company Brain Primitive**: continuously compiles Slack, Jira, and Gmail into an executable, conflict-resolved operational state for AI agents.
 
 ## Overview
 

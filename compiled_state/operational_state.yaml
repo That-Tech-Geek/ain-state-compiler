@@ -1,0 +1,105 @@
+operational_execution_graph:
+  version: 1.0
+  timestamp: "2026-06-07T10:37:38.358926"
+  compiler: ain-state-compiler
+  mode: offline_deterministic
+  llm_calls_made: 0
+  source_counts:
+    slack_events: 6
+    jira_issues: 2
+    emails: 2
+  conflict_disputes:
+    - id: CON-PRD-001
+      category: PRODUCT
+      title: Deployment Status vs Marketing/Engineering Discrepancy
+      severity: CRITICAL
+      summary: "Engineering or SRE disabled a feature flag, but marketing announced it or Jira tracks it as fully done."
+      evidence:
+        - source: Jira (ENG-1043)
+          assertion: "Issue marked DONE implying live deployment: 'Rollout Analytics-v2 Module Deployment of core telemetry trackers. Code merged to main, deployed to ...'"
+        - source: Email (marketing@company.com)
+          assertion: "Outbound GA announcement detected: 'Announcing General Availability of Analytics v2! Today, we are thrilled to announce that our new Ana...'"
+        - source: "Slack (#production-alerts)"
+          assertion: "Feature flag rollback/disable detected: 'Confirmed. Do not re-enable `analytics_v2` until we rewrite the connection pooling hook. Keep the fl...'"
+      resolution: "Halt marketing, sync with SRE on flag status, and update Jira to BLOCKED if rolled back."
+    - id: CON-BIL-002
+      category: BILLING
+      title: Sales Override vs Billing System Configuration Lag
+      severity: HIGH
+      summary: "A pricing override or discount was authorized verbally/on Slack, but the billing system is pending configuration."
+      evidence:
+        - source: "Slack (#sales-leads)"
+          assertion: "Discount/Pricing override authorized: 'Marcus approved override: Elena is authorized to close Acme Corp with a 35% discount. Standard prici...'"
+        - source: Jira (BI-402)
+          assertion: "Billing task pending setup or at standard tier: 'Configure Acme Corp Billing Account Set up Acme Corp account on standard enterprise tiers ($10k/mont...'"
+        - source: Email (ariel@acme.com)
+          assertion: "Customer escalation regarding invoice discrepancy: 'Urgent: Acme Corp billing discrepancy Hi Support Team, we signed our Enterprise agreement today with...'"
+      resolution: Update billing system to reflect the authorized override and notify the customer of the correction.
+  active_state_nodes:
+    analytics_v2:
+      jira_status: Done
+      production_flag: FALSE
+      marketing_claim: GA_Announced
+      operational_status: PAUSED
+      last_flag_change_by: SRE
+      rollback_reason: DB connection pool exhaustion on checkout endpoint
+    acme_corp_billing:
+      agreed_discount: 35%
+      invoiced_amount: "$10,000"
+      correct_amount: "$6,500"
+      pending_jira: BI-402
+      approved_by: marcus_vp_sales
+      operational_status: DISCREPANCY
+      customer_escalation: True
+  event_context:
+    slack_events:
+      - channel: sales-leads
+        user: marcus_vp_sales
+        timestamp: 
+        text: "Marcus approved override: Elena is authorized to close Acme Corp with a 35% discount. Standard pricing cap bypassed for this deal."
+      - channel: sales-leads
+        user: elena_sales
+        timestamp: 
+        text: Acme Corp is willing to close today if we can offer a 35% discount on Enterprise SaaS. Our standard policy cap is 25%. Can we get an exception?
+      - channel: production-alerts
+        user: jared_vp_eng
+        timestamp: 
+        text: Confirmed. Do not re-enable `analytics_v2` until we rewrite the connection pooling hook. Keep the flag set to FALSE.
+      - channel: production-alerts
+        user: alex_sre
+        timestamp: 
+        text: Agreed. I am disabling the feature flag `analytics_v2` globally. Rollout is paused. Checkout latency has normalized back to 45ms.
+      - channel: production-alerts
+        user: sara_devops
+        timestamp: 
+        text: Checking git blame. The DB leak looks tied to the `analytics-v2` rollout merged 30 mins ago. It doesn't close pool sessions on exceptions.
+      - channel: production-alerts
+        user: alex_sre
+        timestamp: 
+        text: "ALERT: Latency spiking on /checkout endpoint. CPU at 95% on primary DB replica. Checking pool connections."
+    jira_issues:
+      - id: BI-402
+        title: Configure Acme Corp Billing Account
+        status: To Do
+        assignee: billing_ops
+        priority: 
+        updated_at: "2026-06-04T08:30:00Z"
+        description: Set up Acme Corp account on standard enterprise tiers ($10k/month recurring). Pending approval.
+      - id: ENG-1043
+        title: Rollout Analytics-v2 Module
+        status: Done
+        assignee: sara_devops
+        priority: 
+        updated_at: "2026-06-04T09:00:00Z"
+        description: "Deployment of core telemetry trackers. Code merged to main, deployed to production. Feature flag analytics_v2 toggled ON."
+    emails:
+      - id: mock_e_1
+        subject: "Urgent: Acme Corp billing discrepancy"
+        sender: ariel@acme.com
+        timestamp: 
+        body: "Hi Support Team, we signed our Enterprise agreement today with Marcus confirming a 35% discount tier. However, our billing dashboard still lists the standard $10,000/month recurring invoice. Can you u"
+      - id: mock_e_0
+        subject: Announcing General Availability of Analytics v2!
+        sender: marketing@company.com
+        timestamp: 
+        body: "Today, we are thrilled to announce that our new Analytics v2 tracking dashboard is now live and available to all enterprise customers! Experience real-time latency analytics today."

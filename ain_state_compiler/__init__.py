@@ -1,5 +1,5 @@
 """
-ain-state-compiler: The G-Brain Enterprise Company Brain Primitive.
+ain-state-compiler: The AIN Enterprise Company Brain Primitive.
 
 A local-first, offline-ingestion engine that continuously compiles raw
 corporate communications (Slack, Jira, Gmail) into an executable,
@@ -10,7 +10,7 @@ Zero-LLM at source. LLMs called only on-demand query.
 
 __version__ = "1.0.2"
 __author__ = "Sambit Mishra"
-__email__ = "contact@ain-compiler.ai"
+__email__ = "sambit1912@gmail.com"
 
 from ain_state_compiler.compiler.state_compiler import StateCompiler
 from ain_state_compiler.compiler.conflict_detector import ConflictDetector
