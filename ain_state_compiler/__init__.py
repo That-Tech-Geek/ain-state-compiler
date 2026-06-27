@@ -8,7 +8,7 @@ internally consistent operational state representation — ready for AI agents.
 Zero-LLM at source. LLMs called only on-demand query.
 """
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "Sambit Mishra"
 __email__ = "sambit1912@gmail.com"
 

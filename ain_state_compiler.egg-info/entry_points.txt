@@ -1,2 +1,0 @@
-[console_scripts]
-ain-brain = ain_state_compiler.cli:main
